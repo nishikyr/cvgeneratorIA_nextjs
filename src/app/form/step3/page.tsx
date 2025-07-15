@@ -40,7 +40,7 @@ export default function UploadStep() {
                 onClick={handleNext}
                 className="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 transition"
                 >
-                Generar
+                Siguiente
                 </button>
             </div>
         </StepFormLayout>

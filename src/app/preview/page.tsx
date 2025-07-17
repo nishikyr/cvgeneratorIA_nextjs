@@ -1,13 +1,13 @@
 'use client';
 
-
+import { SortableSection } from '@/components/SortableSection';
 import { ICvSection } from '@/interfaces/ICvSection';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
 
 
-const iaGeneratedSections: ICvSection[] = [
+const initialSections: ICvSection[] = [
     {
         id: 'sec-1',
         type: 'profile',
@@ -45,25 +45,35 @@ const iaGeneratedSections: ICvSection[] = [
 
 
 export default function PreviewPage() {
+    const [sections, setSections] = useState<ICvSection[]>(initialSections);
+
+    const sensors = useSensors(useSensor(PointerSensor));
+
+    const handleDragEnd = (event: any) => {
+        const { active, over } = event;
+        if (active.id !== over?.id) {
+        const oldIndex = sections.findIndex((s) => s.id === active.id);
+        const newIndex = sections.findIndex((s) => s.id === over.id);
+        setSections(arrayMove(sections, oldIndex, newIndex));
+        }
+    };
+
     return (
-        <div className="space-y-6 mt-6">
-            {iaGeneratedSections.map((section) => (
-                <div
-                key={section.id}
-                className="bg-white p-5 rounded-md shadow border border-gray-200"
-                >
-                <h3 className="text-lg font-bold text-indigo-700 mb-2">{section.title}</h3>
-                {Array.isArray(section.content) ? (
-                    <ul className="list-disc pl-5 text-gray-800 space-y-1">
-                    {section.content.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                    ))}
-                    </ul>
-                ) : (
-                    <p className="text-gray-800 whitespace-pre-line">{section.content}</p>
-                )}
-                </div>
-            ))}
+        <div className="max-w-3xl mx-auto p-6 space-y-6">
+        <h2 className="text-2xl font-bold text-center">🧾 Previsualización del CV</h2>
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+        >
+            <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-6 mt-6">
+                {sections.map((section) => (
+                <SortableSection key={section.id} section={section} />
+                ))}
+            </div>
+            </SortableContext>
+        </DndContext>
         </div>
     );
 }
